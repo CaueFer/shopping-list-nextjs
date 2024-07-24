@@ -8,102 +8,53 @@ import { Input } from "@/components/ui/input";
 import bannerImg from "@/assets/imgs/banner.png";
 
 export default function Home() {
-  const [socket, setSocket] = useState<any>(undefined);
-  const [inbox, setInbox] = useState<{ message: string }[]>([]);
 
-  const [message, setMessage] = useState("");
+  // LIST SETTINGS
+  const [joinListName, setJoinListName] = useState("");
+  const [joinListPassword, setJoinListPassword] = useState("");
 
-  // ROOM SETTINGS
-  const [joinRoomName, setJoinRoomName] = useState("");
-  const [joinRoomPassword, setJoinRoomPassword] = useState("");
-  const [joinedRoomName, setJoinedRoomName] = useState("");
-
-  const [createRoomName, setCreateRoomName] = useState("");
-  const [createRoomPassword, setCreateRoomPassword] = useState("");
+  const [listId, setListId] = useState<number | null>(null);
 
   // HELPERS
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = () => {
-    if (socket && message.trim() !== "") {
-      socket.emit("message", message, joinedRoomName);
-      setMessage("");
-    } else {
-      setError("Digite uma mensagem.");
-    }
-  };
+  const serverURL = "http://localhost:3001";
 
-  const handleJoinRoom = () => {
-    if (
-      socket &&
-      joinRoomName.trim() !== "" &&
-      joinRoomPassword.trim() !== ""
-    ) {
-      socket.emit("joinRoom", joinRoomName, joinRoomPassword);
-      setError(null);
-    } else {
-      setError("Digite o nome e senha válidos");
-    }
-  };
+  const handleJoinList = async () => {
+    try {
+      const response = await fetch(serverURL + "/api/joinList", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: joinListName,
+          password: joinListPassword,
+        }),
+      });
 
-  const handleCreateRoom = () => {
-    if (
-      socket &&
-      createRoomName.trim() !== "" &&
-      createRoomPassword.trim() !== ""
-    ) {
-      socket.emit("createRoom", createRoomName, createRoomPassword);
-      setError(null);
-    } else {
-      setError("Digite o nome valido.");
+      if (response.ok) {
+        const data = await response.json();
+
+        setListId(data.listId);
+        setIsLoading(false);
+      } else {
+        const error = await response.json();
+        console.error("Error joining list:", error);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error joining list:", error);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    const socketServer = io("http://localhost:3001");
-
-    socketServer.on("message", (message: string) => {
-      setInbox((prevInbox) => [...prevInbox, { message }]);
-    });
-
-    socketServer.on("error", (errorMessage: string) => {
-      setError(errorMessage);
-    });
-
-    socketServer.on("joinedRoom", (joinedRoom: string) => {
-      setJoinedRoomName(joinedRoom);
-    });
-
-    setSocket(socketServer);
-
-    return () => {
-      socketServer.disconnect();
-    };
   }, []);
 
   return (
     <div className="flex flex-col gap-2 p-6 h-full">
-      {/* <div className="flex flex-col gap-6 border rounded-lg p-10 w-full">
-        {inbox.map((msg, index) => (
-          <div key={index} className="border rounded px-4 py-2">
-            {msg.message}
-          </div>
-        ))}
-      </div> */}
-
-      {/* <div className="flex gap-2 align-center justify-center">
-        <input
-          onChange={(e) => setMessage(e.target.value)}
-          type="text"
-          name="message"
-          value={message}
-          className="flex-1 bg-black border rounded px-2 py-1"
-        />
-        <button className="w-40" onClick={handleSendMessage}>
-          Enviar
-        </button>
-      </div> */}
-
       <div className="flex flex-col gap-6 border rounded-lg w-full h-[160px] relative">
         <Image
           className="w-full h-full rounded-lg object-cover"
@@ -113,53 +64,55 @@ export default function Home() {
         />
       </div>
 
-      <div className="flex flex-col gap-4 align-center justify-start mt-6">
-        <h2>Entrar em uma Lista Compartilhada</h2>
-
-        <div className="flex flex-col gap-4 justify-start">
-          <Input
-            onChange={(e) => setJoinRoomName(e.target.value)}
-            type="text"
-            name="room"
-            placeholder="Nome da Lista"
-            className="w-auto"
-          />
-          {/* Exibir mensagem de erro */}
-          {error && <div className="text-red-500 text-sm">{error}</div>}
-          {/* Exibir sala conectada */}
-          {joinedRoomName && (
-            <div className="text-indigo">{`Sala atual: ${joinedRoomName}`}</div>
+      <div className="flex flex-col gap-4 justify-start">
+        <h2>Entrar em uma Lista</h2>
+        <Input
+          onChange={(e) => setJoinListName(e.target.value)}
+          type="text"
+          name="join-list-name"
+          placeholder="Nome da Lista"
+          className="w-auto"
+        />
+        <Input
+          onChange={(e) => setJoinListPassword(e.target.value)}
+          type="text"
+          name="join-list-pass"
+          placeholder="Senha"
+          className="w-auto"
+        />
+        <Button className="" onClick={handleJoinList} disabled={isLoading}>
+          {isLoading ? (
+            <svg
+              className="animate-spin h-5 w-5 mr-3 text-white"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C6.48 0 0 6.48 0 12h4z"
+              ></path>
+            </svg>
+          ) : (
+            "Entrar"
           )}
-          <Input
-            onChange={(e) => setJoinRoomPassword(e.target.value)}
-            type="text"
-            name="roompass"
-            placeholder="Senha"
-            className="w-auto"
-          />
-          <Button className="" onClick={handleJoinRoom}>
-            Entrar
-          </Button>
-        </div>
+        </Button>
+        {/* Exibir mensagem de erro */}
+        {error && <div className="text-red-500 text-sm">{error}</div>}
+
+        {/* Exibir sala conectada */}
+        {listId && <div className="text-indigo">{`Sala atual: ${listId}`}</div>}
       </div>
 
-      {/* <div className="flex gap-4 align-center justify-center mt-2">
-        <input
-          onChange={(e) => setCreateRoomName(e.target.value)}
-          type="text"
-          name="room"
-          className="flex-1 bg-black border rounded px-2 py-1"
-        />
-        <input
-          onChange={(e) => setCreateRoomPassword(e.target.value)}
-          type="text"
-          name="roompass"
-          className="flex-1 bg-black border rounded px-2 py-1"
-        />
-        <button className="w-40" onClick={handleCreateRoom}>
-          Criar Sala
-        </button>
-      </div> */}
     </div>
   );
 }
