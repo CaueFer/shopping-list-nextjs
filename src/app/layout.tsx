@@ -28,8 +28,7 @@ export default function RootLayout({
       <body
         className={`${poppins.className} max-w-xl flex flex-col min-h-dvh `}
       >
-        <Nav />
-        <main className="flex-grow bg-theme-gray">{children}</main>
+        {children}
         <Footer />
       </body>
     </html>

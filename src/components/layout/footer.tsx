@@ -15,9 +15,10 @@ import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export function Footer() {
+  const router = useRouter();
   const pathname = usePathname();
 
   const serverURL = "http://localhost:3001";
@@ -64,6 +65,9 @@ export function Footer() {
         setIsLoading(false);
         setIsDialogOpen(false);
         setError(null);
+
+        const query = new URLSearchParams({ owner: userId }).toString();
+        router.push(`/listas?${query}`);
       } else {
         const error = await response.json();
 
@@ -90,16 +94,25 @@ export function Footer() {
       );
     }
 
+    const storedUserId = localStorage.getItem("userId");
     const userIdTemp = localStorage.getItem("userId") || generateUUID();
-    localStorage.setItem("userId", userId);
+    if (!storedUserId) localStorage.setItem("userId", userIdTemp);
+
     setUserId(userIdTemp);
   }, []);
   return (
     <>
-      <footer className="px-4 bg-white w-full flex h-24 text-black rounded-t-lg gap-3">
+      <footer className="px-4 bg-white w-full flex h-24 text-black rounded-t-lg gap-3 relative">
+        <div
+          className={`absolute top-0 h-[2px] bg-theme-blue w-[16%] transition-all duration-300
+          ${isActive("/listas") ? "ml-[20.3%]" : ""}
+          ${isActive("/enviar") ? "ml-[56%]" : ""}
+          ${isActive("/config") ? "ml-[76.3%]" : ""}
+        `}
+        ></div>
         <div
           className={`flex-1 flex items-center justify-center text-sm ${
-            isActive("/") ? "text-theme-blue border-t-2 border-theme-blue" : ""
+            isActive("/") ? "text-theme-blue" : ""
           }`}
         >
           <Link
@@ -118,23 +131,24 @@ export function Footer() {
           }`}
         >
           <Link
-            href="/listas"
+            href={{
+              pathname: "/listas",
+              query: { owner: userId },
+            }}
             passHref
             className="flex flex-col items-center justify-center"
           >
-            {" "}
             <i className="bx bx-search-alt text-2xl"></i>
             <span>Listas</span>
           </Link>
         </div>
 
-        <div className="flex flex-col items-center justify-center relative  w-[75px]">
+        <div className="flex-1  flex flex-col items-center justify-center relative ">
           <div
             role="button"
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-theme-blue w-[60px] h-[60px] rounded-full z-10 flex items-center justify-center"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-theme-blue w-[55px] h-[55px] xsm:w-[60px] xsm:h-[60px] rounded-full z-10 flex items-center justify-center"
             onClick={openDialog}
           >
-            {" "}
             <i className="bx bx-plus text-4xl font-bold z-20 text-white"></i>
           </div>
         </div>
@@ -160,7 +174,7 @@ export function Footer() {
           }`}
         >
           <Link
-            href="/"
+            href="/config"
             passHref
             className="flex flex-col items-center justify-center"
           >
