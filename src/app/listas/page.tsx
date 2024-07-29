@@ -90,7 +90,7 @@ export default function ListasPage() {
 
   return (
     <>
-      <NavListas title="Minhas Listas"  showBackBtn={false}/>
+      <NavListas title="Minhas Listas" showBackBtn={false} />
       <main className="flex-grow bg-theme-gray relative">
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -101,20 +101,28 @@ export default function ListasPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-4 p-6 h-full">
-            {lists.map((lista: Lista) => {
-              return (
-                <div
-                  key={lista.id}
-                  className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center"
-                  onClick={() => {
-                    router.push(`/lista?listId=${lista.id}&listName=${encodeURIComponent(lista.name)}`);
-                  }}
-                >
-                  <i className="bx bxs-right-arrow text-sm"></i>
-                  <h2>{lista.name}</h2>
-                </div>
-              );
-            })}
+            {lists.length>0 ? (
+              lists.map((lista: Lista) => {
+                return (
+                  <div
+                    key={lista.id}
+                    className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center"
+                    onClick={() => {
+                      router.push(
+                        `/lista?listId=${
+                          lista.id
+                        }&listName=${encodeURIComponent(lista.name)}`
+                      );
+                    }}
+                  >
+                    <i className="bx bxs-right-arrow text-sm"></i>
+                    <h2>{lista.name}</h2>
+                  </div>
+                );
+              })
+            ) : (
+              <h1>Nenhuma lista cadatrada!</h1>
+            )}
           </div>
         )}
       </main>

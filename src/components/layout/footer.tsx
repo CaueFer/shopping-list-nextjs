@@ -16,13 +16,14 @@ import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useFingerprint } from "../../hooks/useFingerprint";
 
 export function Footer() {
   const router = useRouter();
   const pathname = usePathname();
 
   const serverURL = "http://localhost:3001";
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState(" ");
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -82,24 +83,25 @@ export function Footer() {
     }
   };
 
+  const fingerprint = useFingerprint();
+
   useEffect(() => {
-    function generateUUID() {
-      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-        /[xy]/g,
-        function (c) {
-          var r = (Math.random() * 16) | 0,
-            v = c == "x" ? r : (r & 0x3) | 0x8;
-          return v.toString(16);
-        }
-      );
+    if (fingerprint) {
+      //console.log("Device Fingerprint:", fingerprint);
     }
 
     const storedUserId = localStorage.getItem("userId");
-    const userIdTemp = localStorage.getItem("userId") || generateUUID();
-    if (!storedUserId) localStorage.setItem("userId", userIdTemp);
+    if (storedUserId) {
+      setUserId(storedUserId);
+    } else {
+      if (fingerprint) {
+        const newUserId = fingerprint;
+        localStorage.setItem("userId", newUserId);
+        setUserId(newUserId);
+      }
+    }
+  }, [fingerprint]);
 
-    setUserId(userIdTemp);
-  }, []);
   return (
     <>
       <footer className="px-4 bg-white w-full flex h-24 text-black rounded-t-lg gap-3 relative">
@@ -127,7 +129,7 @@ export function Footer() {
 
         <div
           className={`flex-1 flex items-center justify-center text-sm ${
-            isActive("/listas") ? "text-theme-blue" : ""
+            isActive("/listas" || "/lista") ? "text-theme-blue" : ""
           }`}
         >
           <Link

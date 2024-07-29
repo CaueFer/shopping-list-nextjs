@@ -1,7 +1,9 @@
 "use client";
 
 import { NavListas } from "@/components/layout/nav-listas";
+import { Input } from "@/components/ui/input";
 import { Lista } from "@/core/interfaces/lista.interface";
+import { listItem } from "@/core/interfaces/listItem.interface";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -11,6 +13,8 @@ export default function SingleLista() {
   const searchParams = useSearchParams();
   const [listId, setListId] = useState<string | null>(null);
   const [listName, setListName] = useState<string | null>(null);
+  const [listItems, setListItems] = useState<[] | null>([]);
+  const [itemName, setItemName] = useState<string | null>(null);
 
   // HELPERS
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +40,8 @@ export default function SingleLista() {
       if (response.ok) {
         const data = await response.json();
 
-        console.log(data);
+        //console.log(data);
+
         setLists(data);
         setIsLoading(false);
         setError(null);
@@ -51,13 +56,45 @@ export default function SingleLista() {
     }
   };
 
+  const createListItem = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${serverURL}/api/createListItem`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          listId,
+          itemName,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        console.log(data);
+
+        setIsLoading(false);
+        setError(null);
+      } else {
+        const error = await response.json();
+        console.error("Error create list items:", error);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error create list items", error);
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const id = searchParams.get('listId');
-    const name = searchParams.get('listName');
+    const id = searchParams.get("listId");
+    const name = searchParams.get("listName");
 
     setListId(id);
     setListName(name);
-
   }, [searchParams]);
 
   useEffect(() => {
@@ -81,7 +118,35 @@ export default function SingleLista() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 p-6 h-full"></div>
+          <div className="flex flex-col gap-4 p-6 h-full">
+            {listItems && listItems.length > 0 ? (
+              listItems.map((item: listItem) => {
+                return (
+                  <div
+                    key={item.id}
+                    className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center"
+                  >
+                    <i className="bx bxs-right-arrow text-sm"></i>
+                    <h2>{item.name}</h2>
+                  </div>
+                );
+              })
+            ) : (
+              <h1>Nenhum item cadatrado!</h1>
+            )}
+
+            <div className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center opacity-50">
+              <i className="bx bxs-right-arrow text-sm"></i>
+              <Input
+                placeholder="Item..."
+                className="border-0 ring-0 p-0 text-md placeholder:text-black focus-visible:ring-0 focus-visible:ring-offset-0 "
+              />
+            </div>
+            <div className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center">
+              <i className="bx bx-plus text-sm"></i>
+              <h2>Adicionar item</h2>
+            </div>
+          </div>
         )}
       </main>
     </>
