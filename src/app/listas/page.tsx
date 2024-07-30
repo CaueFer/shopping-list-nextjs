@@ -12,16 +12,7 @@ export default function ListasPage() {
   const searchParams = useSearchParams();
   const owner = searchParams.get("owner");
 
-  const [socket, setSocket] = useState<any>(undefined);
   const serverURL = "http://localhost:3001";
-
-  // ROOM SETTINGS
-  const [joinListName, setJoinListName] = useState("");
-  const [joinListPassword, setJoinListPassword] = useState("");
-  const [joinedRoomName, setJoinedListName] = useState("");
-
-  const [createListName, setCreateListName] = useState("");
-  const [createListPassword, setCreateListPassword] = useState("");
 
   // HELPERS
   const [error, setError] = useState<string | null>(null);
@@ -64,28 +55,6 @@ export default function ListasPage() {
 
   useEffect(() => {
     getLists();
-
-    const socketServer = io("http://localhost:3001");
-
-    socketServer.on("error", (errorMessage: string) => {
-      setIsLoading(false);
-      setError(errorMessage);
-    });
-
-    socketServer.on("joinedList", (joinedList: string) => {
-      setIsLoading(false);
-      setJoinedListName(joinedList);
-    });
-
-    // socket.on("itemUpdated", (updatedItem) => {
-    //   // Atualize a interface do usuário com o item atualizado
-    // });
-
-    setSocket(socketServer);
-
-    return () => {
-      socketServer.disconnect();
-    };
   }, []);
 
   return (
