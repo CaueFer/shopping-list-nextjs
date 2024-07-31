@@ -82,7 +82,7 @@
 
 @keyframes remove-item {
   from {
-    transform: translateX(250px);
+    transform: translateX(inherit);
     opacity: 1;
   }
   to {

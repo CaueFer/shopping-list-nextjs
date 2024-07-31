@@ -12,6 +12,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { SwipeCallback, useSwipeable } from "react-swipeable";
 import { SwappItem } from "@/components/layout/swappItem";
+import Image from "next/image";
+import arrowImage from "@/assets/imgs/arrow-click.png";
 
 export default function SingleLista() {
   const serverURL = "http://localhost:3001";
@@ -268,28 +270,46 @@ export default function SingleLista() {
     setFilteredListItems(finalShortedList);
   };
 
-  const deleteItem = async (listId: any, itemId: any) => {
-    try {
-      const response = await fetch(serverURL + "/api/deleteListItem", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          listId,
-          itemId,
-        }),
-      });
+  const deleteItem = (itemId: any): Promise<void> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(serverURL + "/api/deleteListItem", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            listId,
+            itemId,
+          }),
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-      } else {
-        const error = await response.json();
-        console.error("Error delete list item:", error);
+        if (response.ok) {
+          const data = await response.json();
+
+          toast({
+            description: "Item deletado!",
+          });
+
+          setFilteredListItems((prevItems) => {
+            const finalList = prevItems.filter(
+              (e) => e.id.toString() !== itemId
+            );
+
+            return finalList;
+          });
+
+          resolve();
+        } else {
+          const error = await response.json();
+          console.error("Error delete list item:", error);
+          reject(new Error(`Error deleting item: ${error.message}`));
+        }
+      } catch (error) {
+        console.error("Error delete list item", error);
+        reject(error);
       }
-    } catch (error) {
-      console.error("Error delete list item", error);
-    }
+    });
   };
 
   return (
@@ -311,7 +331,7 @@ export default function SingleLista() {
             {filteredListItems && filteredListItems.length > 0 ? (
               filteredListItems.map((item: listItem) => {
                 return (
-                  <SwappItem item={item} >
+                  <SwappItem item={item} onRemove={deleteItem}>
                     <div className="flex flex-row gap-2 items-center text-black">
                       <Checkbox
                         checked={item.marked}
@@ -319,7 +339,7 @@ export default function SingleLista() {
                       />
                       <Input
                         placeholder="Item..."
-                        className="border-0 ring-0 p-0 text-md focus-visible:p-0 placeholder:text-black focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px]"
+                        className="border-0 ring-0 p-0 text-md focus-visible:p-0 placeholder:text-black focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px] w-auto"
                         onChange={(e) => {
                           updateLocalItemName(item.id, e.target.value);
                         }}
@@ -365,6 +385,18 @@ export default function SingleLista() {
             >
               <i className="bx bx-plus text-sm"></i>
               <h2>Adicionar item</h2>
+              {filteredListItems && filteredListItems.length > 0 ? (
+                ""
+              ) : (
+                <div className="absolute top-[10%] left-[-5%] rotate-[-20deg]">
+                  <Image
+                    src={arrowImage}
+                    alt="click arrow"
+                    width={160}
+                    height={160}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
