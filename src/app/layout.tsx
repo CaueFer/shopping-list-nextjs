@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 
@@ -6,6 +5,7 @@ import "../styles/globals.css";
 import "boxicons/css/boxicons.min.css";
 import { Nav } from "../components/layout/nav";
 import { Footer } from "../components/layout/footer";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 const poppins = Poppins({
@@ -30,6 +30,7 @@ export default function RootLayout({
       >
         {children}
         <Footer />
+        <Toaster />
       </body>
     </html>
   );

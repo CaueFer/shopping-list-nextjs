@@ -7,10 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import bannerImg from "@/assets/imgs/banner.png";
 import { Nav } from "@/components/layout/nav";
-import { useRouter } from "next/router";
 
 export default function Home() {
-
   // LIST SETTINGS
   const [joinListName, setJoinListName] = useState("");
   const [joinListPassword, setJoinListPassword] = useState("");

@@ -8,6 +8,10 @@ import { listItem } from "@/core/interfaces/listItem.interface";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { SwipeCallback, useSwipeable } from "react-swipeable";
+import { SwappItem } from "@/components/layout/swappItem";
 
 export default function SingleLista() {
   const serverURL = "http://localhost:3001";
@@ -15,13 +19,16 @@ export default function SingleLista() {
   const searchParams = useSearchParams();
   const [listId, setListId] = useState<string | null>(null);
   const [listName, setListName] = useState<string | null>(null);
+
   const [listItems, setListItems] = useState<listItem[]>([]);
-  const [itemName, setItemName] = useState<string | null>(null);
+  const [filteredListItems, setFilteredListItems] = useState<listItem[]>([]);
 
   // HELPERS
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
+  // SETS AND TEMPS
   const [addItem, setAddItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -29,10 +36,76 @@ export default function SingleLista() {
   // SOCKET IO
   const [socket, setSocket] = useState<any>(undefined);
 
+  useEffect(() => {
+    const id = searchParams.get("listId");
+    const name = searchParams.get("listName");
+
+    setListId(id);
+    setListName(name);
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (listId) {
+      getListItem();
+
+      const socketIo = io(serverURL);
+      setSocket(socketIo);
+
+      // CONEXAO
+      socketIo.on("connect", () => {
+        //console.log("Conectado ao servidor Socket.IO");
+
+        if (listId)
+          socketIo.emit("joinList", listId, (response: any) => {
+            if (response.success) {
+              //console.log(response.message);
+            } else {
+              console.error(response.message);
+            }
+          });
+        else console.log("Join error, without listID!");
+      });
+
+      return () => {
+        socketIo.disconnect();
+      };
+    }
+  }, [listId]);
+
+  useEffect(() => {
+    if (socket && listId && listItems.length > 0) {
+      createSocketConnection();
+    }
+  }, [socket, listId, listItems]);
+
+  const createSocketConnection = () => {
+    if (!socket) return;
+
+    socket.on("connect_error", (err: any) => {
+      console.error("Erro de conexão com o servidor Socket.IO:", err);
+    });
+
+    // UTILS
+    socket.on("error", (errorMessage: string) => {
+      setIsLoading(false);
+      setError(errorMessage);
+    });
+
+    socket.on("joinedList", (joinedList: string) => {
+      setIsLoading(false);
+      console.log(joinedList);
+    });
+
+    socket.on("itemUpdated", (updatedItem: listItem) => {
+      if (updatedItem) {
+        updateListAfterItemUpdate(updatedItem);
+      }
+    });
+  };
+
   const getListItem = async () => {
     setIsLoading(true);
 
-    //console.log(owner);
     try {
       const url = new URL(`${serverURL}/api/getListItems`);
       if (listId) url.searchParams.append("listId", listId);
@@ -48,9 +121,17 @@ export default function SingleLista() {
       if (response.ok) {
         const data = await response.json();
 
-        console.log(data);
+        //console.log(data);
 
-        setListItems(data);
+        const listItemsShorted = data.sort((a: listItem, b: listItem) =>
+          a.name.localeCompare(b.name)
+        );
+
+        // INICIALIZO OS 2 ARRAYS
+        //console.log(listItemsShorted);
+        setListItems(listItemsShorted);
+        setFilteredListItems(listItemsShorted);
+
         setIsLoading(false);
         setError(null);
       } else {
@@ -76,13 +157,13 @@ export default function SingleLista() {
 
   const addItemEventOut = () => {
     setTimeout(() => {
-      if (newItemName.length > 1) {
+      if (newItemName.length > 2) {
         createItem();
       } else {
         setAddItem(false);
         setNewItemName("");
       }
-    }, 500);
+    }, 250);
   };
 
   const createItem = async () => {
@@ -104,7 +185,7 @@ export default function SingleLista() {
         const data = await response.json();
         //console.log(data);
 
-        setListItems((prevItems) => [...prevItems, data]);
+        setFilteredListItems((prevItems) => [...prevItems, data]);
 
         // DATA => ITEM Q FOI CRIADO
         callUpdateItemSocket(data);
@@ -125,6 +206,8 @@ export default function SingleLista() {
   };
 
   const callUpdateItemSocket = (item: listItem) => {
+    if (!socket) return;
+
     const updatedItem = {
       itemId: item.id,
       itemName: item.name,
@@ -141,93 +224,72 @@ export default function SingleLista() {
     });
   };
 
-  const updateItemName = (itemId: any, newName: string) => {
-    console.log(itemId, newName);
-    const updatedItems = listItems.map((item) =>
+  const updateLocalItemName = (itemId: any, newName: string) => {
+    const updatedItems = filteredListItems.map((item) =>
       item.id === itemId ? { ...item, name: newName } : item
     );
 
-    setListItems(updatedItems);
+    setFilteredListItems(updatedItems);
+  };
 
-    const updatedItem = updatedItems.find((item) => item.id === itemId);
-    if (updatedItem) callUpdateItemSocket(updatedItem);
+  const syncDbItemName = (itemId: any, newName: string) => {
+    if (newName.length >= 2) {
+      const updatedItem = filteredListItems.find((item) => item.id === itemId);
+      if (updatedItem) callUpdateItemSocket(updatedItem);
+    }
   };
 
   const updateItemMark = (itemId: number, newMark: boolean | string) => {
     if (typeof newMark === "boolean") {
-      const updatedItems = listItems.map((item) =>
+      const updatedItems = filteredListItems.map((item) =>
         item.id === itemId ? { ...item, marked: newMark } : item
       );
 
-      setListItems(updatedItems);
+      setFilteredListItems(updatedItems);
 
       const updatedItem = updatedItems.find((item) => item.id === itemId);
       if (updatedItem) callUpdateItemSocket(updatedItem);
     }
   };
 
-  useEffect(() => {
-    const id = searchParams.get("listId");
-    const name = searchParams.get("listName");
+  const updateListAfterItemUpdate = (updatedItem: listItem) => {
+    //console.log(listItems, updatedItem);
+    const listToFilter = listItems.slice(0);
 
-    setListId(id);
-    setListName(name);
+    const filteredList = listToFilter.filter(
+      (item) => item.id !== updatedItem.id
+    );
 
-    if (listId && listName) {
-      createSocketConnection();
-    }
-  }, [searchParams, listId]);
+    const finalList = [...filteredList, updatedItem];
+    const finalShortedList = finalList.sort((a: listItem, b: listItem) =>
+      a.name.localeCompare(b.name)
+    );
 
+    setFilteredListItems(finalShortedList);
+  };
 
-  const createSocketConnection = () => {
-    const socketServer = io("http://localhost:3001");
+  const deleteItem = async (listId: any, itemId: any) => {
+    try {
+      const response = await fetch(serverURL + "/api/deleteListItem", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          listId,
+          itemId,
+        }),
+      });
 
-    // CONEXAO
-    socketServer.on("connect", () => {
-      //console.log("Conectado ao servidor Socket.IO");
-      setSocket(socketServer);
-
-      if (listId)
-        socketServer.emit("joinList", listId, (response: any) => {
-          if (response.success) {
-            // QUANDO CONNECTION SUCCESS, PUXA A LISTA DO BANCO
-            getListItem();
-          } else {
-            console.error(response.message);
-          }
-        });
-      else console.log("Join error, without listID!");
-    });
-
-    socketServer.on("connect_error", (err: any) => {
-      console.error("Erro de conexão com o servidor Socket.IO:", err);
-    });
-
-    // UTILS
-    socketServer.on("error", (errorMessage: string) => {
-      setIsLoading(false);
-      setError(errorMessage);
-    });
-
-    socketServer.on("joinedList", (joinedList: string) => {
-      setIsLoading(false);
-      console.log(joinedList);
-    });
-
-    socketServer.on("itemUpdated", (updatedItem: listItem) => {
-      if (updatedItem) {
-        getListItem();
+      if (response.ok) {
+        const data = await response.json();
+      } else {
+        const error = await response.json();
+        console.error("Error delete list item:", error);
       }
-    });
-
-    // socketServer.on("itemUpdated", (updatedItem) => {
-    //   // Atualize a interface do usuário com o item atualizado
-    // });
-
-    // DISCONNECT
-    return () => {
-      socketServer.disconnect();
-    };
+    } catch (error) {
+      console.error("Error delete list item", error);
+    }
   };
 
   return (
@@ -236,8 +298,8 @@ export default function SingleLista() {
         title={listName ? listName : "Carregando..."}
         showBackBtn={true}
       />
-      <main className="flex-grow bg-theme-gray relative">
-        {isLoading ? (
+      <main className="flex-grow bg-theme-gray relative overflow-x-clip">
+        {isLoading && filteredListItems.length <= 0 ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="flex-col gap-4 w-full flex items-center justify-center">
               <div className="w-14 h-14 border-8 text-theme-blue text-4xl animate-spin border-gray-300 flex items-center justify-center border-t-theme-blue rounded-full"></div>
@@ -245,31 +307,31 @@ export default function SingleLista() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 p-6 h-full">
-            {listItems && listItems.length > 0 ? (
-              listItems.map((item: listItem) => {
+          <div className="flex flex-col gap-4 p-6 h-full relative">
+            {filteredListItems && filteredListItems.length > 0 ? (
+              filteredListItems.map((item: listItem) => {
                 return (
-                  <div
-                    key={item.id}
-                    className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center justify-between drop-shadow-md"
-                  >
+                  <SwappItem item={item} >
                     <div className="flex flex-row gap-2 items-center text-black">
                       <Checkbox
-                        defaultChecked={item.marked}
+                        checked={item.marked}
                         onCheckedChange={(e) => updateItemMark(item.id, e)}
                       />
                       <Input
                         placeholder="Item..."
                         className="border-0 ring-0 p-0 text-md focus-visible:p-0 placeholder:text-black focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px]"
-                        onChange={(e) =>
-                          updateItemName(item.id, e.target.value)
-                        }
+                        onChange={(e) => {
+                          updateLocalItemName(item.id, e.target.value);
+                        }}
+                        onBlur={(e) => {
+                          syncDbItemName(item.id, e.target.value);
+                        }}
                         value={item.name}
                       />
                     </div>
 
                     <i className="bx bx-dots-vertical-rounded text-sm"></i>
-                  </div>
+                  </SwappItem>
                 );
               })
             ) : (
