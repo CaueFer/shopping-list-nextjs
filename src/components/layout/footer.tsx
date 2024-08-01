@@ -104,12 +104,12 @@ export function Footer() {
 
   return (
     <>
-      <footer className="px-4 bg-white w-full flex h-24 text-black rounded-t-lg gap-3 relative">
+      <footer className="px-[5%] bg-white w-full flex h-24 text-black rounded-t-lg gap-3 relative">
         <div
           className={`absolute top-0 h-[2px] bg-theme-blue w-[16%] transition-all duration-300
-          ${isActive("/listas") ? "ml-[20.3%]" : ""}
+          ${isActive("/listas") ? "ml-[18.5%]" : ""}
           ${isActive("/enviar") ? "ml-[56%]" : ""}
-          ${isActive("/config") ? "ml-[76.3%]" : ""}
+          ${isActive("/config") ? "ml-[74%]" : ""}
         `}
         ></div>
         <div

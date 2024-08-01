@@ -131,6 +131,7 @@ export default function SingleLista() {
 
         // INICIALIZO OS 2 ARRAYS
         //console.log(listItemsShorted);
+
         setListItems(listItemsShorted);
         setFilteredListItems(listItemsShorted);
 
@@ -328,10 +329,10 @@ export default function SingleLista() {
           </div>
         ) : (
           <div className="flex flex-col gap-4 p-6 h-full relative">
-            {filteredListItems && filteredListItems.length > 0 ? (
+            {filteredListItems.length > 0 ? (
               filteredListItems.map((item: listItem) => {
                 return (
-                  <SwappItem item={item} onRemove={deleteItem}>
+                  <SwappItem item={item} onRemove={deleteItem} key={item.id}>
                     <div className="flex flex-row gap-2 items-center text-black">
                       <Checkbox
                         checked={item.marked}
@@ -360,11 +361,11 @@ export default function SingleLista() {
 
             <div
               className={`rounded-lg p-3 bg-white flex flex-row justify-between gap-2 text-md items-center drop-shadow-md opacity-50 
-                ${
-                  addItem
-                    ? "animate-fade-up animate-duration-500 animate-ease-out"
-                    : "hidden"
-                }`}
+                  ${
+                    addItem
+                      ? "animate-fade-up animate-duration-500 animate-ease-out"
+                      : "hidden"
+                  }`}
             >
               <div className="flex flex-row gap-2 items-center text-black">
                 <Checkbox />
