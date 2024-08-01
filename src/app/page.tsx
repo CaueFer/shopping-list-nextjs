@@ -54,7 +54,7 @@ export default function Home() {
 
   return (
     <>
-      <Nav />
+      <Nav title="Lista de compras"/>
       <main className="flex-grow bg-theme-gray">
         <div className="flex flex-col gap-2 p-6 h-full">
           <div className="flex flex-col gap-6 border rounded-lg w-full h-[160px] relative">

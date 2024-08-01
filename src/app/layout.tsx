@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="">
       <body
-        className={`${poppins.className} max-w-md flex flex-col min-h-dvh mx-auto`}
+        className={`${poppins.className} max-w-md flex flex-col min-h-dvh bg-gray-500`}
       >
         {children}
         <Footer />

@@ -17,6 +17,7 @@ import { Input } from "../ui/input";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useFingerprint } from "../../hooks/useFingerprint";
+import { User } from "lucide-react";
 
 export function Footer() {
   const router = useRouter();
@@ -104,10 +105,10 @@ export function Footer() {
 
   return (
     <>
-      <footer className="px-[5%] bg-white w-full flex h-24 text-black rounded-t-lg gap-3 relative">
+      <footer className="px-[5%] bg-white w-full flex h-24 text-black gap-3 relative">
         <div
           className={`absolute top-0 h-[2px] bg-theme-blue w-[16%] transition-all duration-300
-          ${isActive("/listas") ? "ml-[18.5%]" : ""}
+          ${isActive("/listas") || isActive("/lista") ? "ml-[18.5%]" : ""}
           ${isActive("/enviar") ? "ml-[56%]" : ""}
           ${isActive("/config") ? "ml-[74%]" : ""}
         `}
@@ -129,7 +130,7 @@ export function Footer() {
 
         <div
           className={`flex-1 flex items-center justify-center text-sm ${
-            isActive("/listas" || "/lista") ? "text-theme-blue" : ""
+            isActive("/listas") || isActive("/lista") ? "text-theme-blue" : ""
           }`}
         >
           <Link
@@ -161,7 +162,10 @@ export function Footer() {
           }`}
         >
           <Link
-            href="/enviar"
+            href={{
+              pathname: "/enviar",
+              query: { owner: userId },
+            }}
             passHref
             className="flex flex-col items-center justify-center"
           >
@@ -176,12 +180,12 @@ export function Footer() {
           }`}
         >
           <Link
-            href="/config"
+            href="javascript:void(0)"
             passHref
             className="flex flex-col items-center justify-center"
           >
-            <i className="bx bx-home-alt text-2xl"></i>
-            <span>Listas</span>
+            <User className="text-2xl" />
+            <span className="mt-1">Perfil</span>
           </Link>
         </div>
       </footer>
