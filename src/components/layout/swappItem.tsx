@@ -54,7 +54,7 @@ export function SwappItem({
 
   const handlers = useSwipeable({
     onSwiping: (eventData) => {
-      console.log("swipado");
+      //console.log("swipado");
       setDragging(true);
 
       if (eventData.deltaX <= 0) {

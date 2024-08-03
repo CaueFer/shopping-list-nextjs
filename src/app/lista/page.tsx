@@ -3,14 +3,11 @@
 import { NavListas } from "@/components/layout/nav-listas";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Lista } from "@/core/interfaces/lista.interface";
 import { listItem } from "@/core/interfaces/listItem.interface";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
-import { SwipeCallback, useSwipeable } from "react-swipeable";
 import { SwappItem } from "@/components/layout/swappItem";
 import Image from "next/image";
 import arrowImage from "@/assets/imgs/arrow-click.png";
@@ -103,6 +100,12 @@ export default function SingleLista() {
         updateListAfterItemUpdate(updatedItem);
       }
     });
+
+    socket.on("itemDeleted", (id: number) => {
+      if (id) {
+        updateListAfterItemDelete(id);
+      }
+    });
   };
 
   const getListItem = async () => {
@@ -191,7 +194,10 @@ export default function SingleLista() {
         setFilteredListItems((prevItems) => [...prevItems, data]);
 
         // DATA => ITEM Q FOI CRIADO
-        callUpdateItemSocket(data);
+        callUpdateItemSocket(data, "update");
+        toast({
+          description: "Item adicionado!",
+        });
 
         setIsLoading(false);
         setError(null);
@@ -208,7 +214,7 @@ export default function SingleLista() {
     }
   };
 
-  const callUpdateItemSocket = (item: listItem) => {
+  const callUpdateItemSocket = (item: listItem, updateType: string) => {
     if (!socket) return;
 
     const updatedItem = {
@@ -218,27 +224,41 @@ export default function SingleLista() {
       listId: item.listId,
     };
 
-    socket.emit("updateListItem", updatedItem, (response: any) => {
-      if (response.success) {
-        console.log(response.message);
-      } else {
-        console.error(response.message);
-      }
-    });
+    if (updateType === "update") {
+      socket.emit("updateListItem", updatedItem, (response: any) => {
+        if (response.success) {
+          console.log(response.message);
+        } else {
+          console.error(response.message);
+        }
+      });
+    }
+
+    if (updateType === "delete") {
+      socket.emit("deleteListItem", updatedItem, (response: any) => {
+        if (response.success) {
+          console.log(response.message);
+        } else {
+          console.error(response.message);
+        }
+      });
+    }
   };
 
   const updateLocalItemName = (itemId: any, newName: string) => {
-    const updatedItems = filteredListItems.map((item) =>
-      item.id === itemId ? { ...item, name: newName } : item
-    );
+    setFilteredListItems((prev) => {
+      const updatedItems = prev.map((item) =>
+        item.id === itemId ? { ...item, name: newName } : item
+      );
 
-    setFilteredListItems(updatedItems);
+      return updatedItems;
+    });
   };
 
   const syncDbItemName = (itemId: any, newName: string) => {
     if (newName.length >= 2) {
       const updatedItem = filteredListItems.find((item) => item.id === itemId);
-      if (updatedItem) callUpdateItemSocket(updatedItem);
+      if (updatedItem) callUpdateItemSocket(updatedItem, "update");
     }
   };
 
@@ -251,24 +271,32 @@ export default function SingleLista() {
       setFilteredListItems(updatedItems);
 
       const updatedItem = updatedItems.find((item) => item.id === itemId);
-      if (updatedItem) callUpdateItemSocket(updatedItem);
+      if (updatedItem) callUpdateItemSocket(updatedItem, "update");
     }
   };
 
   const updateListAfterItemUpdate = (updatedItem: listItem) => {
-    //console.log(listItems, updatedItem);
-    const listToFilter = listItems.slice(0);
+    setFilteredListItems((prevItems) => {
+      const listToFilter = [...prevItems];
 
-    const filteredList = listToFilter.filter(
-      (item) => item.id !== updatedItem.id
-    );
+      const filteredList = listToFilter.filter(
+        (item) => item.id !== updatedItem.id
+      );
 
-    const finalList = [...filteredList, updatedItem];
-    const finalShortedList = finalList.sort((a: listItem, b: listItem) =>
-      a.name.localeCompare(b.name)
-    );
+      const finalList = [...filteredList, updatedItem];
 
-    setFilteredListItems(finalShortedList);
+      return finalList;
+    });
+  };
+
+  const updateListAfterItemDelete = (id: number) => {
+    setFilteredListItems((prevItems) => {
+      const listToFilter = [...prevItems];
+
+      const finalList = listToFilter.filter((item) => item.id !== id);
+
+      return finalList;
+    });
   };
 
   const deleteItem = (itemId: any): Promise<void> => {
@@ -287,6 +315,9 @@ export default function SingleLista() {
 
         if (response.ok) {
           const data = await response.json();
+
+          // DATA => ITEM Q FOI CRIADO
+          callUpdateItemSocket(data.item, "delete");
 
           toast({
             description: "Item deletado!",
@@ -316,6 +347,7 @@ export default function SingleLista() {
   return (
     <>
       <NavListas
+        listId={listId}
         title={listName ? listName : "Carregando..."}
         showBackBtn={true}
       />

@@ -5,18 +5,20 @@ import Image from "next/image";
 import { io } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import bannerImg from "@/assets/imgs/banner.png";
+import appImg from "@/assets/imgs/app-banner.png";
 import { Nav } from "@/components/layout/nav";
 import { useRouter } from "next/navigation";
+import { Lista } from "@/core/interfaces/lista.interface";
 
 export default function Home() {
   const router = useRouter();
 
   // LIST SETTINGS
-  const [joinListName, setJoinListName] = useState("");
-  const [joinListPassword, setJoinListPassword] = useState("");
+  const [joinListName, setJoinListName] = useState<string | null>(null);
+  const [joinListPassword, setJoinListPassword] = useState<string | null>(null);
 
-  const [listId, setListId] = useState<number | null>(null);
+  const [recentLists, setRecentLists] = useState<Lista[]>([]);
+  const [filteredRecentLists, setFilteredRecentLists] = useState<Lista[]>([]);
 
   // HELPERS
   const [error, setError] = useState<string | null>(null);
@@ -40,9 +42,18 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
 
+        setRecentLists((prev) => {
+          return [...prev, data.list];
+        });
+
         router.push(
-          `/lista?listId=${data.list.id}&listName=${encodeURIComponent(data.list.name)}`
+          `/lista?listId=${data.list.id}&listName=${encodeURIComponent(
+            data.list.name
+          )}`
         );
+
+        setJoinListName(null);
+        setJoinListPassword(null);
         setIsLoading(false);
       } else {
         const error = await response.json();
@@ -55,17 +66,46 @@ export default function Home() {
     }
   };
 
+  const updateRecentsList = () => {
+    const recents = localStorage.getItem("recents");
+    const currentRecents = recents ? JSON.parse(recents) : [];
+
+    const combinedRecents = [...currentRecents, ...recentLists];
+
+    let uniqueRecents = Array.from(
+      new Map(combinedRecents.map((item) => [item.id, item])).values()
+    );
+
+    uniqueRecents = uniqueRecents.slice(-3);
+    localStorage.setItem("recents", JSON.stringify(uniqueRecents));
+
+    setFilteredRecentLists(uniqueRecents.reverse());
+  };
+
+  useEffect(() => {
+    const recents = localStorage.getItem("recents");
+    const initialRecents = recents ? JSON.parse(recents) : [];
+
+    setRecentLists(initialRecents);
+  }, []);
+
+  useEffect(() => {
+    if (recentLists.length > 0) updateRecentsList();
+  }, [recentLists]);
+
   return (
     <>
       <Nav title="Lista de compras" />
       <main className="flex-grow bg-theme-gray">
-        <div className="flex flex-col gap-2 p-6 h-full">
-          <div className="flex flex-col gap-6 border rounded-lg w-full h-[160px] relative">
+        <div className="flex flex-col gap-8 p-6 h-full">
+          <div className="flex flex-col gap-6 border rounded-lg w-full h-[200px] relative">
             <Image
-              className="w-full h-full rounded-lg object-cover"
-              src={bannerImg}
+              className="w-full h-full rounded-lg object-cover "
+              src={appImg}
               fill
               alt="banner app"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority
             />
           </div>
 
@@ -113,10 +153,33 @@ export default function Home() {
             </Button>
             {/* Exibir mensagem de erro */}
             {error && <div className="text-red-500 text-sm">{error}</div>}
+          </div>
 
-            {/* Exibir sala conectada */}
-            {listId && (
-              <div className="text-indigo">{`Sala atual: ${listId}`}</div>
+          <div className="flex flex-col gap-4 border-t border-gray-500">
+            <h1 className="mt-8">Listas recentes: </h1>
+            {filteredRecentLists.length > 0 ? (
+              filteredRecentLists.map((lista: Lista) => {
+                return (
+                  <div
+                    key={lista.id}
+                    className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center opacity-75"
+                    onClick={() => {
+                      router.push(
+                        `/lista?listId=${
+                          lista.id
+                        }&listName=${encodeURIComponent(lista.name)}`
+                      );
+                    }}
+                  >
+                    <i className="bx bxs-right-arrow text-sm"></i>
+                    <h2>{lista.name}</h2>
+                  </div>
+                );
+              })
+            ) : (
+              <h2 className="text-sm">
+                Você não entrou em nenhuma lista ainda!
+              </h2>
             )}
           </div>
         </div>
