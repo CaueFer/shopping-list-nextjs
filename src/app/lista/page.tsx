@@ -4,16 +4,28 @@ import { NavListas } from "@/components/layout/nav-listas";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { listItem } from "@/core/interfaces/listItem.interface";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { useToast } from "@/components/ui/use-toast";
 import { SwappItem } from "@/components/layout/swappItem";
 import Image from "next/image";
 import arrowImage from "@/assets/imgs/arrow-click.png";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CustomDropdown } from "@/components/layout/dropdown";
 
 export default function SingleLista() {
   const serverURL = "http://localhost:3001";
+  const router = useRouter();
 
   const searchParams = useSearchParams();
   const [listId, setListId] = useState<string | null>(null);
@@ -21,6 +33,8 @@ export default function SingleLista() {
 
   const [listItems, setListItems] = useState<listItem[]>([]);
   const [filteredListItems, setFilteredListItems] = useState<listItem[]>([]);
+
+  const [position, setPosition] = useState("bottom");
 
   // HELPERS
   const [error, setError] = useState<string | null>(null);
@@ -344,13 +358,95 @@ export default function SingleLista() {
     });
   };
 
+  const deleteList = () => {
+    if (listId) {
+      return new Promise<void>(async (resolve, reject) => {
+        try {
+          const response = await fetch(serverURL + "/api/deleteList", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              listId,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            //console.log(data)
+
+            const recents = localStorage.getItem("recents");
+            if (recents) {
+              const recentItems = JSON.parse(recents);
+
+              const filteredRecents = recentItems.filter(
+                (item: listItem) => item.id !== data.list.id
+              );
+
+              localStorage.setItem("recents", JSON.stringify(filteredRecents));
+            }
+
+            toast({
+              description: "Lista deletada!",
+              duration: 1500,
+            });
+
+            const storedUserId = localStorage.getItem("userId");
+            if (storedUserId) {
+              const query = new URLSearchParams({
+                owner: storedUserId,
+              }).toString();
+              router.push(`/listas?${query}`);
+            }
+
+            resolve();
+          } else {
+            const error = await response.json();
+            //console.error("Error delete list:", error);
+
+            toast({
+              variant: "destructive",
+              description: error.error,
+            });
+            reject();
+          }
+        } catch (error) {
+          console.error("Error delete list", error);
+          reject(error);
+        }
+      });
+    }
+  };
+
   return (
     <>
       <NavListas
         listId={listId}
         title={listName ? listName : "Carregando..."}
         showBackBtn={true}
-      />
+      >
+        <CustomDropdown icon={<i className="bx bx-filter"></i>}>
+          <DropdownMenuLabel>Ordenar</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+            <DropdownMenuRadioItem value="top">A - Z </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="bottom">
+              Recentes
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </CustomDropdown>
+
+        <CustomDropdown icon={<i className="bx bx-dots-vertical-rounded "></i>}>
+          <DropdownMenuItem
+            onClick={(e) => {
+              deleteList();
+            }}
+          >
+            Deletar Lista
+          </DropdownMenuItem>
+        </CustomDropdown>
+      </NavListas>
       <main className="flex-grow bg-theme-gray relative overflow-x-clip">
         {isLoading && filteredListItems.length <= 0 ? (
           <div className="absolute inset-0 flex items-center justify-center">

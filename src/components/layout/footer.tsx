@@ -69,7 +69,15 @@ export function Footer() {
         setError(null);
 
         const query = new URLSearchParams({ owner: userId }).toString();
-        router.push(`/listas?${query}`);
+        const newUrl = `/listas?${query}`;
+
+        const currentUrl = `${pathname}?${query}`;
+        if (currentUrl === newUrl) {
+          window.location.reload();
+        } else {
+          router.push(newUrl);
+        }
+
       } else {
         const error = await response.json();
 
@@ -190,73 +198,75 @@ export function Footer() {
         </div>
       </footer>
 
-      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex flex-row justify-between">
-              Criar uma Lista
-              <i
-                className="bx bx-x text-3xl font-bold"
-                onClick={() => setIsDialogOpen(false)}
-              ></i>
-            </AlertDialogTitle>
-            <AlertDialogDescription className="py-4">
-              <Input
-                onChange={(e) => setCreateListName(e.target.value)}
-                type="text"
-                name="create-list-name"
-                placeholder="Nome da Lista"
-                className="w-full"
-              />
-              <Input
-                onChange={(e) => setCreateListPassword(e.target.value)}
-                type="text"
-                name="create-list-pass"
-                placeholder="Senha"
-                className="w-full mt-4"
-              />
+      <div>
+        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex flex-row justify-between">
+                Criar uma Lista
+                <i
+                  className="bx bx-x text-3xl font-bold"
+                  onClick={() => setIsDialogOpen(false)}
+                ></i>
+              </AlertDialogTitle>
+              <AlertDialogDescription className="py-4">
+                <Input
+                  onChange={(e) => setCreateListName(e.target.value)}
+                  type="text"
+                  name="create-list-name"
+                  placeholder="Nome da Lista"
+                  className="w-full"
+                />
+                <Input
+                  onChange={(e) => setCreateListPassword(e.target.value)}
+                  type="text"
+                  name="create-list-pass"
+                  placeholder="Senha"
+                  className="w-full mt-4"
+                />
 
-              <div className="flex flex-col gap-4 justify-start text-start">
-                {/* Exibir mensagem de erro */}
-                {error && <div className="text-red-500 text-md">{error}</div>}
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="">Cancelar</AlertDialogCancel>{" "}
-            <Button
-              className=""
-              onClick={handleCreateList}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <svg
-                  className="animate-spin h-5 w-5 mr-3 text-white"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C6.48 0 0 6.48 0 12h4z"
-                  ></path>
-                </svg>
-              ) : (
-                "Criar"
-              )}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                <div className="flex flex-col gap-4 justify-start text-start">
+                  {/* Exibir mensagem de erro */}
+                  {error && <div className="text-red-500 text-md">{error}</div>}
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="">Cancelar</AlertDialogCancel>{" "}
+              <Button
+                className=""
+                onClick={handleCreateList}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <svg
+                    className="animate-spin h-5 w-5 mr-3 text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C6.48 0 0 6.48 0 12h4z"
+                    ></path>
+                  </svg>
+                ) : (
+                  "Criar"
+                )}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </>
   );
 }

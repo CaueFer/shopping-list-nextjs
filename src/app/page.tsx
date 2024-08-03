@@ -58,6 +58,8 @@ export default function Home() {
       } else {
         const error = await response.json();
         console.error("Error joining list:", error);
+
+        setError(error.error)
         setIsLoading(false);
       }
     } catch (error) {
