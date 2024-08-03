@@ -25,6 +25,8 @@
     "react-dom": "^18",
     "react-swipeable": "^7.0.1",
     "socket.io-client": "^4.7.5",
+    "sweetalert2": "^11.12.4",
+    "sweetalert2-react-content": "^5.0.7",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "tailwindcss-animated": "^1.1.2"

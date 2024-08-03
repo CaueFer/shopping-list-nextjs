@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import bannerImg from "@/assets/imgs/banner.png";
 import { Nav } from "@/components/layout/nav";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
   // LIST SETTINGS
   const [joinListName, setJoinListName] = useState("");
   const [joinListPassword, setJoinListPassword] = useState("");
@@ -37,7 +40,9 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
 
-        setListId(data.listId);
+        router.push(
+          `/lista?listId=${data.list.id}&listName=${encodeURIComponent(data.list.name)}`
+        );
         setIsLoading(false);
       } else {
         const error = await response.json();
@@ -50,11 +55,9 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {}, []);
-
   return (
     <>
-      <Nav title="Lista de compras"/>
+      <Nav title="Lista de compras" />
       <main className="flex-grow bg-theme-gray">
         <div className="flex flex-col gap-2 p-6 h-full">
           <div className="flex flex-col gap-6 border rounded-lg w-full h-[160px] relative">

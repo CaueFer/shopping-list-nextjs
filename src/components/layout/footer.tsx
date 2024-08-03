@@ -180,7 +180,7 @@ export function Footer() {
           }`}
         >
           <Link
-            href="javascript:void(0)"
+            href=""
             passHref
             className="flex flex-col items-center justify-center"
           >

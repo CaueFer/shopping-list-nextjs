@@ -1,7 +1,9 @@
 "use client";
 
+import { showSuccessAlert } from "@/components/alerts/successAlert";
 import { Nav } from "@/components/layout/nav";
 import { Lista } from "@/core/interfaces/lista.interface";
+import useCopyLinkToClipboard from "@/hooks/copyToClipboard";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,11 +16,15 @@ export default function enviarList() {
 
   const serverURL = "http://localhost:3001";
 
+  const { copyResponse, copyLinkToClipboard } = useCopyLinkToClipboard();
+
   // HELPERS
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const [lists, setLists] = useState([]);
+  const [listName, setListName] = useState<string | null>(null);
+  const [listPassword, setListaPassword] = useState<string | null>(null);
 
   const getLists = async () => {
     setIsLoading(true);
@@ -53,9 +59,63 @@ export default function enviarList() {
     }
   };
 
+  const linkToClipboard = async (item: Lista) => {
+    const currentUrl = new URL(window.location.href);
+
+    currentUrl.search = "";
+
+    currentUrl.searchParams.set("name", item.name);
+    currentUrl.searchParams.set("password", item.password);
+
+    copyLinkToClipboard(currentUrl);
+  };
+
+  const handleJoinList = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(serverURL + "/api/joinList", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: listName,
+          password: listPassword,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        router.push(
+          `/lista?listId=${data.list.id}&listName=${encodeURIComponent(
+            data.list.name
+          )}`
+        );
+        setIsLoading(false);
+      } else {
+        const error = await response.json();
+        console.error("Error joining list:", error);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error joining list:", error);
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    getLists();
-  }, []);
+    const name = searchParams.get("name");
+    const pass = searchParams.get("password");
+
+    if (name) setListName(name);
+    if (pass) setListaPassword(pass);
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (listName && listPassword) handleJoinList();
+    else getLists();
+  }, [listName, listPassword]);
 
   return (
     <>
@@ -70,20 +130,24 @@ export default function enviarList() {
           </div>
         ) : (
           <div className="flex flex-col gap-4 p-6 h-full">
-            <h1>Clique na lista que deseja compartilhar.</h1>
             {lists.length > 0 ? (
-              lists.map((lista: Lista) => {
-                return (
-                  <div
-                    key={lista.id}
-                    className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center"
-                    onClick={() => {}}
-                  >
-                    <i className="bx bx-share-alt text-sm"></i>
-                    <h2>{lista.name}</h2>
-                  </div>
-                );
-              })
+              <>
+                <h1>Clique na lista que deseja compartilhar.</h1>
+                {lists.map((lista: Lista) => {
+                  return (
+                    <div
+                      key={lista.id}
+                      className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center"
+                      onClick={() => {
+                        linkToClipboard(lista);
+                      }}
+                    >
+                      <i className="bx bx-share-alt text-sm"></i>
+                      <h2>{lista.name}</h2>
+                    </div>
+                  );
+                })}
+              </>
             ) : (
               <h1>Nenhuma lista cadatrada!</h1>
             )}
