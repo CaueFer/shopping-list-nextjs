@@ -54,7 +54,7 @@ export function SwappItem({
 
   const handlers = useSwipeable({
     onSwiping: (eventData) => {
-      //console.log("swipado");
+      console.log("swipado");
       setDragging(true);
 
       if (eventData.deltaX <= 0) {
@@ -62,7 +62,8 @@ export function SwappItem({
       } else setPositionX(eventData.deltaX);
     },
     onSwipedRight: (eventData) => {
-      if (eventData.deltaX >= swipeThreshold) {// TAMANHO EM PIXEL
+      if (eventData.deltaX >= swipeThreshold) {
+        // TAMANHO EM PIXEL
         handleRightSwipe();
       } else {
         setDragging(false);
@@ -73,7 +74,7 @@ export function SwappItem({
     trackMouse: true,
     trackTouch: true,
     preventScrollOnSwipe: true,
-    touchEventOptions: { passive: true },
+    touchEventOptions: { passive: false },
   });
 
   const startThreshold = swipeThreshold * 0.2;
@@ -85,30 +86,35 @@ export function SwappItem({
     )
   );
   return (
-    <div className="relative">
-      <div
-        className={`absolute rounded-lg top-0 left-0 w-full h-full bg-rose-500 flex items-center justify-between 
+    <>
+      <div className="relative">
+        <div
+          className={`absolute rounded-lg top-0 left-0 w-full h-full bg-rose-500 flex items-center justify-between 
           ${
             customOpacity === 1
               ? ""
               : "animate-pulse animate-duration-1000 animate-ease-linear "
           }
         `}
-        style={{ opacity: customOpacity ? customOpacity : 0 }}
-      >
-        <i className="bx bx-trash text-white text-xl ml-4"></i>
-        <div className="w-7 h-7 border-4 text-white text-sm animate-spin border-gray-200 flex items-center justify-center border-t-white rounded-full mr-5"></div>
-      </div>
-      <div
-        {...handlers}
-        ref={divRef}
-        className={`sweapleItem rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center justify-between drop-shadow-md 
+          style={{ opacity: customOpacity ? customOpacity : 0 }}
+        >
+          <i className="bx bx-trash text-white text-xl ml-4"></i>
+          <div className="w-7 h-7 border-4 text-white text-sm animate-spin border-gray-200 flex items-center justify-center border-t-white rounded-full mr-5"></div>
+        </div>
+        <div
+          ref={divRef}
+          className={`sweapleItem rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center justify-between drop-shadow-md 
           ${dragging ? "dragging" : ""} 
           ${removed ? "removing" : ""}`}
-        style={{ transform: `translateX(${positionX}px)` }}
-      >
-        {children}
+          style={{ transform: `translateX(${positionX}px)` }}
+        >
+          {children}
+        </div>
+        <div
+          {...handlers}
+          className={`absolute rounded-lg top-0 bottom-0 right-0 w-[55%] bg-transparent flex items-center justify-between z-50`}
+        ></div>
       </div>
-    </div>
+    </>
   );
 }

@@ -77,7 +77,6 @@ export function Footer() {
         } else {
           router.push(newUrl);
         }
-
       } else {
         const error = await response.json();
 
@@ -224,11 +223,6 @@ export function Footer() {
                   placeholder="Senha"
                   className="w-full mt-4"
                 />
-
-                <div className="flex flex-col gap-4 justify-start text-start">
-                  {/* Exibir mensagem de erro */}
-                  {error && <div className="text-red-500 text-md">{error}</div>}
-                </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

@@ -205,7 +205,12 @@ export default function SingleLista() {
         const data = await response.json();
         //console.log(data);
 
-        setFilteredListItems((prevItems) => [...prevItems, data]);
+        setFilteredListItems((prevItems) => {
+          const finalList = [...prevItems, data];
+          finalList.sort((a, b) => a.name.localeCompare(b.name));
+
+          return finalList;
+        });
 
         // DATA => ITEM Q FOI CRIADO
         callUpdateItemSocket(data, "update");
@@ -298,6 +303,7 @@ export default function SingleLista() {
       );
 
       const finalList = [...filteredList, updatedItem];
+      finalList.sort((a, b) => a.name.localeCompare(b.name));
 
       return finalList;
     });
