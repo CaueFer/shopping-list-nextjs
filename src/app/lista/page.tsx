@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { listItem } from "@/core/interfaces/listItem.interface";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { useToast } from "@/components/ui/use-toast";
 import { SwappItem } from "@/components/layout/swappItem";
@@ -23,8 +23,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CustomDropdown } from "@/components/layout/dropdown";
 
-export default function SingleLista() {
-  const serverURL = "http://localhost:3001";
+function SingleLista() {
+  const serverURL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:3001';
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -543,3 +543,13 @@ export default function SingleLista() {
     </>
   );
 }
+
+const SingleListaWrapper = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SingleLista />
+    </Suspense>
+  )
+}
+
+export default SingleListaWrapper;

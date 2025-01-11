@@ -6,15 +6,15 @@ import { Lista } from "@/core/interfaces/lista.interface";
 import useCopyLinkToClipboard from "@/hooks/copyToClipboard";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-export default function enviarList() {
+function EnviarList() {
   const router = useRouter();
 
   const searchParams = useSearchParams();
   const owner = searchParams.get("owner");
 
-  const serverURL = "http://localhost:3001";
+  const serverURL = process.env.NEXT_PUBLIC_API_URL;
 
   const { copyResponse, copyLinkToClipboard } = useCopyLinkToClipboard();
 
@@ -157,3 +157,13 @@ export default function enviarList() {
     </>
   );
 }
+
+const EnviarListWrapper = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EnviarList />
+    </Suspense>
+  )
+}
+
+export default EnviarListWrapper;

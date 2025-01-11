@@ -3,16 +3,15 @@
 import { NavListas } from "@/components/layout/nav-listas";
 import { Lista } from "@/core/interfaces/lista.interface";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
+import { Suspense, useEffect, useState } from "react";
 
-export default function ListasPage() {
+function ListasPage() {
   const router = useRouter();
 
   const searchParams = useSearchParams();
   const owner = searchParams.get("owner");
 
-  const serverURL = "http://localhost:3001";
+  const serverURL = process.env.NEXT_PUBLIC_API_URL;
 
   // HELPERS
   const [error, setError] = useState<string | null>(null);
@@ -98,3 +97,14 @@ export default function ListasPage() {
     </>
   );
 }
+
+
+const ListasPageWrapper = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ListasPage />
+    </Suspense>
+  );
+};
+
+export default ListasPageWrapper;

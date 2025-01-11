@@ -23,7 +23,7 @@ export function Footer() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const serverURL = "http://localhost:3001";
+  const serverURL = process.env.NEXT_PUBLIC_API_URL;
   const [userId, setUserId] = useState(" ");
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
