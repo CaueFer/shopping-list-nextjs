@@ -115,9 +115,13 @@ export default function SingleLista() {
       }
     });
 
-    socket.on("itemDeleted", (id: number) => {
-      if (id) {
-        updateListAfterItemDelete(id);
+    socket.on("itemDeleted", ({ itemId }: { itemId: number }) => {
+      if (itemId) {
+        updateListAfterItemDelete(itemId);
+
+        toast({
+          description: "Item deletado!",
+        });
       }
     });
   };
@@ -336,7 +340,7 @@ export default function SingleLista() {
         if (response.ok) {
           const data = await response.json();
 
-          // DATA => ITEM Q FOI CRIADO
+          // DATA => ITEM Q FOI DELETADO
           callUpdateItemSocket(data.item, "delete");
 
           toast({

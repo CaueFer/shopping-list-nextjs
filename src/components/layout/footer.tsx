@@ -80,7 +80,7 @@ export function Footer() {
       } else {
         const error = await response.json();
 
-        //console.error("Error creating list:", error);
+        console.error("Error creating list:", error);
         setError(error.error);
 
         setIsLoading(false);
@@ -223,6 +223,8 @@ export function Footer() {
                   placeholder="Senha"
                   className="w-full mt-4"
                 />
+                {/* Exibir mensagem de erro */}
+                {error && <div className="text-red-500 text-sm mt-3">{error}</div>}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
