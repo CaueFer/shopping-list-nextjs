@@ -137,12 +137,12 @@ function EnviarList() {
                   return (
                     <div
                       key={lista.id}
-                      className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center"
+                      className="rounded-lg p-3 bg-white flex flex-row gap-2 text-lg items-center"
                       onClick={() => {
                         linkToClipboard(lista);
                       }}
                     >
-                      <i className="bx bx-share-alt text-sm"></i>
+                      <i className="bx bx-share-alt text-md"></i>
                       <h2>{lista.name}</h2>
                     </div>
                   );

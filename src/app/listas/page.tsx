@@ -76,7 +76,7 @@ function ListasPage() {
                 return (
                   <div
                     key={lista.id}
-                    className="rounded-lg p-3 bg-white flex flex-row gap-2 text-md items-center"
+                    className="rounded-lg p-3 bg-white flex flex-row gap-2 text-lg items-center"
                     onClick={() => {
                       router.push(
                         `/lista?listId=${
@@ -85,7 +85,7 @@ function ListasPage() {
                       );
                     }}
                   >
-                    <i className="bx bxs-right-arrow text-sm"></i>
+                    <i className="bx bxs-right-arrow text-md"></i>
                     <h2>{lista.name}</h2>
                   </div>
                 );

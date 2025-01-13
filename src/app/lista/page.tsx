@@ -482,7 +482,7 @@ function SingleLista() {
                       />
                       <Input
                         placeholder="Item..."
-                        className="border-0 ring-0 p-0 text-md focus-visible:p-0 placeholder:text-black focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px] w-auto"
+                        className="border-0 ring-0 p-0 text-lg focus-visible:p-0 placeholder:text-black focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px] w-auto"
                         onChange={(e) => {
                           updateLocalItemName(item.id, e.target.value);
                         }}
