@@ -25,6 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="">
+      <head><meta name="apple-mobile-web-app-title" content="Grocery List" /></head>
       <body
         className={`${poppins.className} max-w-md flex flex-col min-h-dvh bg-gray-500`}
       >

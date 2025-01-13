@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { io } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import appImg from "@/assets/imgs/app-banner.png";
 import { Nav } from "@/components/layout/nav";
 import { useRouter } from "next/navigation";
 import { Lista } from "@/core/interfaces/lista.interface";
+import InstallPwa from "@/components/pages/InstallPwa";
 
 export default function Home() {
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function Home() {
         const error = await response.json();
         console.error("Error joining list:", error);
 
-        setError(error.error)
+        setError(error.error);
         setIsLoading(false);
       }
     } catch (error) {
@@ -68,7 +68,7 @@ export default function Home() {
     }
   };
 
-  const updateRecentsList = () => {
+  const updateLocalStorageRecentsList = () => {
     const recents = localStorage.getItem("recents");
     const currentRecents = recents ? JSON.parse(recents) : [];
 
@@ -92,7 +92,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (recentLists.length > 0) updateRecentsList();
+    if (recentLists.length > 0) updateLocalStorageRecentsList();
   }, [recentLists]);
 
   return (
@@ -107,7 +107,8 @@ export default function Home() {
               fill
               alt="banner app"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              priority
+              
+              
             />
           </div>
 
@@ -186,6 +187,7 @@ export default function Home() {
           </div>
         </div>
       </main>
+      <InstallPwa />
     </>
   );
 }
