@@ -11,7 +11,9 @@ function ListasPage() {
   const searchParams = useSearchParams();
   const owner = searchParams.get("owner");
 
-  const serverURL = process.env.NEXT_PUBLIC_API_URL;
+  const serverURL = process.env.NEXT_PUBLIC_ONDEV === 'TRUE'
+  ? process.env.NEXT_PUBLIC_API_URL_DEV
+  : process.env.NEXT_PUBLIC_API_URL_PROD || "http://localhost:3001";
 
   // HELPERS
   const [error, setError] = useState<string | null>(null);
