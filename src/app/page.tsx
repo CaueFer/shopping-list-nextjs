@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import appImg from "@/assets/imgs/app-banner.png";
 import { Nav } from "@/components/layout/nav";
 import { useRouter } from "next/navigation";
 import { Lista } from "@/core/interfaces/lista.interface";
-import InstallPwa from "@/components/pages/InstallPwa";
 
 export default function Home() {
   const router = useRouter();
@@ -103,12 +101,10 @@ export default function Home() {
           <div className="flex flex-col gap-6 border rounded-lg w-full h-[200px] relative">
             <Image
               className="w-full h-full rounded-lg object-cover "
-              src={appImg}
+              src={"/assets/images/app-banner.png"}
               fill
               alt="banner app"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              
-              
             />
           </div>
 
@@ -187,7 +183,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-      <InstallPwa />
     </>
   );
 }

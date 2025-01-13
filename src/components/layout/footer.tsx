@@ -183,11 +183,11 @@ export function Footer() {
 
         <div
           className={`flex-1 flex items-center justify-center text-sm ${
-            isActive("/config") ? "text-theme-blue" : ""
+            isActive("/profile") ? "text-theme-blue" : ""
           }`}
         >
           <Link
-            href=""
+            href="/profile"
             passHref
             className="flex flex-col items-center justify-center"
           >

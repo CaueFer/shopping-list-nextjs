@@ -1,10 +1,8 @@
 "use client";
 
-import { showSuccessAlert } from "@/components/alerts/successAlert";
 import { Nav } from "@/components/layout/nav";
 import { Lista } from "@/core/interfaces/lista.interface";
 import useCopyLinkToClipboard from "@/hooks/copyToClipboard";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 

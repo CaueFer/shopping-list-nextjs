@@ -10,7 +10,7 @@ import { io } from "socket.io-client";
 import { useToast } from "@/components/ui/use-toast";
 import { SwappItem } from "@/components/layout/swappItem";
 import Image from "next/image";
-import arrowImage from "@/assets/imgs/arrow-click.png";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -529,7 +529,7 @@ function SingleLista() {
               ) : (
                 <div className="absolute top-[10%] left-[-5%] rotate-[-20deg]">
                   <Image
-                    src={arrowImage}
+                    src={"/assets/images/arrow-click.png"}
                     alt="click arrow"
                     width={160}
                     height={160}
