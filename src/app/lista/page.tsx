@@ -516,6 +516,12 @@ function SingleLista() {
                   className="border-0 ring-0 p-0 text-md focus-visible:p-0 placeholder:text-black focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px]"
                   ref={inputRef}
                   onBlur={addItemEventOut}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.code === 'Enter') {
+                      e.preventDefault();
+                      addItemEventOut();  
+                    }
+                  }}
                   onChange={(e) => setNewItemName(e.target.value)}
                   value={newItemName}
                 />
