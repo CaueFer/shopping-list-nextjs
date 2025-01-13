@@ -21,7 +21,7 @@ export default function Profile() {
   return (
     <>
       <Nav title="Perfil" />
-      <main className="flex-grow bg-theme-gray">
+      <main className="flex-1 bg-theme-gray">
         <div className="flex flex-col gap-8 p-6 h-full">
           <div className="flex flex-col gap-4 justify-start">
             <h2>Suas Informações</h2>

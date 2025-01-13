@@ -22,7 +22,10 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const serverURL = "http://localhost:3001";
+  const serverURL =
+    process.env.NEXT_PUBLIC_ONDEV === "TRUE"
+      ? process.env.NEXT_PUBLIC_API_URL_DEV
+      : process.env.NEXT_PUBLIC_API_URL_PROD || "http://localhost:3001";
 
   const handleJoinList = async () => {
     setIsLoading(true);
@@ -102,7 +105,7 @@ export default function Home() {
   return (
     <>
       <Nav title="Lista de compras" />
-      <main className="flex-grow bg-theme-gray">
+      <main className="flex-1 bg-theme-gray">
         <div className="flex flex-col gap-8 p-6 h-full">
           <div className="flex flex-col gap-6 border rounded-lg w-full h-[200px] relative">
             <Image
