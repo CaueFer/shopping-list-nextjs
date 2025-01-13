@@ -119,6 +119,10 @@ function SingleLista() {
     socket.on("itemUpdated", (updatedItem: listItem) => {
       if (updatedItem) {
         updateListAfterItemUpdate(updatedItem);
+
+        toast({
+          description: "Item atualizado!",
+        });
       }
     });
 
@@ -297,7 +301,6 @@ function SingleLista() {
         );
         if (updatedItem) callUpdateItemSocket(updatedItem, "update");
       }
-      else console.log('iguais n vou att')
     }
   };
 
