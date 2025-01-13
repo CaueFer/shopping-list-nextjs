@@ -238,7 +238,7 @@ export function Footer() {
             <AlertDialogFooter>
               <AlertDialogCancel className="" disabled={isLoading}>
                 Cancelar
-              </AlertDialogCancel>{" "}
+              </AlertDialogCancel>
               <Button
                 className=""
                 onClick={handleCreateList}

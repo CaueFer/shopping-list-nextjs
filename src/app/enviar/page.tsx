@@ -118,7 +118,7 @@ function EnviarList() {
   return (
     <>
       <Nav title="Enviar listas" />
-      <main className="flex-grow bg-theme-gray relative overflow-x-clip">
+      <main className="flex-1 bg-theme-gray relative overflow-x-clip">
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="flex-col gap-4 w-full flex items-center justify-center">

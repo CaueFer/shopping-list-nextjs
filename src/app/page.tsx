@@ -25,6 +25,9 @@ export default function Home() {
   const serverURL = "http://localhost:3001";
 
   const handleJoinList = async () => {
+    setIsLoading(true);
+    setError(null);
+
     try {
       const response = await fetch(serverURL + "/api/joinList", {
         method: "POST",
@@ -62,6 +65,9 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error joining list:", error);
+      setError("Ocorreu um erro, tente novamente!");
+      setIsLoading(false);
+    } finally {
       setIsLoading(false);
     }
   };
