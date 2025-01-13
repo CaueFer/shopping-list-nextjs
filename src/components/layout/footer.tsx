@@ -46,6 +46,12 @@ export function Footer() {
     setIsLoading(true);
     setError(null);
 
+    if (!createListName || !createListPassword) {
+      setIsLoading(false);
+      setError("Nome e senha da lista inválido.");
+      return;
+    }
+
     try {
       const response = await fetch(serverURL + "/api/createList", {
         method: "POST",
@@ -88,6 +94,7 @@ export function Footer() {
     } catch (error) {
       setIsLoading(false);
       console.error("Error creating list:", error);
+      setError("Ocorreu um erro, tente novamente!");
     }
   };
 
@@ -223,11 +230,15 @@ export function Footer() {
                   className="w-full mt-4"
                 />
                 {/* Exibir mensagem de erro */}
-                {error && <div className="text-red-500 text-sm mt-3">{error}</div>}
+                {error && (
+                  <div className="text-red-500 text-sm mt-3">{error}</div>
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="">Cancelar</AlertDialogCancel>{" "}
+              <AlertDialogCancel className="" disabled={isLoading}>
+                Cancelar
+              </AlertDialogCancel>{" "}
               <Button
                 className=""
                 onClick={handleCreateList}
