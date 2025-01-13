@@ -48,7 +48,10 @@ function SingleLista() {
   // SETS AND TEMPS
   const [addItem, setAddItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [previousItemName, setPreviousItemName] = useState("");
+  const itemNameInputRef = useRef<HTMLInputElement>(null);
+
+  const [enterPressed, setEnterPressed] = useState(false);
 
   // SOCKET IO
   const [socket, setSocket] = useState<any>(undefined);
@@ -177,8 +180,8 @@ function SingleLista() {
     setAddItem(true);
 
     setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
+      if (itemNameInputRef.current) {
+        itemNameInputRef.current.focus();
       }
     }, 0);
   };
@@ -192,6 +195,10 @@ function SingleLista() {
         setNewItemName("");
       }
     }, 250);
+
+    if (enterPressed) {
+      setEnterPressed(false);
+    }
   };
 
   const createItem = async () => {
@@ -284,8 +291,13 @@ function SingleLista() {
 
   const syncDbItemName = (itemId: any, newName: string) => {
     if (newName.length >= 2) {
-      const updatedItem = filteredListItems.find((item) => item.id === itemId);
-      if (updatedItem) callUpdateItemSocket(updatedItem, "update");
+      if (newName !== previousItemName) {
+        const updatedItem = filteredListItems.find(
+          (item) => item.id === itemId
+        );
+        if (updatedItem) callUpdateItemSocket(updatedItem, "update");
+      }
+      else console.log('iguais n vou att')
     }
   };
 
@@ -489,6 +501,9 @@ function SingleLista() {
                         onBlur={(e) => {
                           syncDbItemName(item.id, e.target.value);
                         }}
+                        onFocus={(e) => {
+                          setPreviousItemName(e.target.value)
+                        }}
                         value={item.name}
                       />
                     </div>
@@ -510,16 +525,22 @@ function SingleLista() {
                   }`}
             >
               <div className="flex flex-row gap-2 items-center text-black">
-                <Checkbox />
+                <Checkbox disabled={true} />
                 <Input
                   placeholder="Item..."
                   className="border-0 ring-0 p-0 text-md focus-visible:p-0 placeholder:text-black focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px]"
-                  ref={inputRef}
-                  onBlur={addItemEventOut}
+                  ref={itemNameInputRef}
+                  onBlur={() => {
+                    if (!enterPressed) addItemEventOut();
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.code === 'Enter') {
+                    if (e.key === "Enter" || e.code === "Enter") {
                       e.preventDefault();
-                      addItemEventOut();  
+                      setEnterPressed(() => true);
+                      setTimeout(() => {
+                        itemNameInputRef.current?.blur();
+                      }, 0);
+                      addItemEventOut();
                     }
                   }}
                   onChange={(e) => setNewItemName(e.target.value)}

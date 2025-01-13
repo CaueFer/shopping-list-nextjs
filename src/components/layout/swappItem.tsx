@@ -112,7 +112,7 @@ export function SwappItem({
         </div>
         <div
           {...handlers}
-          className={`absolute rounded-lg top-0 bottom-0 right-0 w-[55%] bg-transparent flex items-center justify-between z-50`}
+          className={`absolute rounded-lg top-0 bottom-0 right-0 w-[65%] bg-transparent flex items-center justify-between z-50`}
         ></div>
       </div>
     </>
