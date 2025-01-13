@@ -24,10 +24,11 @@ import {
 import { CustomDropdown } from "@/components/layout/dropdown";
 
 function SingleLista() {
-  const serverURL = process.env.NEXT_PUBLIC_ONDEV === 'TRUE'
-  ? process.env.NEXT_PUBLIC_API_URL_DEV
-  : process.env.NEXT_PUBLIC_API_URL_PROD || "http://localhost:3001";
-  
+  const serverURL: string =
+    process.env.NEXT_PUBLIC_ONDEV === "TRUE"
+      ? process.env.NEXT_PUBLIC_API_URL_DEV || "http://localhost:3001"
+      : process.env.NEXT_PUBLIC_API_URL_PROD || "http://localhost:3001";
+
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -552,7 +553,7 @@ const SingleListaWrapper = () => {
     <Suspense fallback={<div>Loading...</div>}>
       <SingleLista />
     </Suspense>
-  )
-}
+  );
+};
 
 export default SingleListaWrapper;
