@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CustomDropdown } from "@/components/layout/dropdown";
+import { ToastAction } from "@/components/ui/toast";
 
 function SingleLista() {
   const serverURL: string =
@@ -177,6 +178,14 @@ function SingleLista() {
     } catch (error) {
       console.error("Error get list items", error);
       setIsLoading(false);
+
+      router.back();
+
+      toast({
+        variant: "default",
+        title: "Ops!",
+        description: "Ocorreu um erro ao entrar na lista.",
+      });
     }
   };
 
@@ -505,7 +514,7 @@ function SingleLista() {
                           syncDbItemName(item.id, e.target.value);
                         }}
                         onFocus={(e) => {
-                          setPreviousItemName(e.target.value)
+                          setPreviousItemName(e.target.value);
                         }}
                         value={item.name}
                       />

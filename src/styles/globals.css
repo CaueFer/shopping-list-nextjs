@@ -90,3 +90,8 @@
     opacity: 0;
   }
 }
+
+.custom-rating span svg {
+  width: 15px;
+  height: 15px;
+}
