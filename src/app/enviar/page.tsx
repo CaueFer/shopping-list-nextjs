@@ -12,9 +12,10 @@ function EnviarList() {
   const searchParams = useSearchParams();
   const owner = searchParams.get("owner");
 
-  const serverURL = process.env.NEXT_PUBLIC_ONDEV === 'TRUE'
-  ? process.env.NEXT_PUBLIC_API_URL_DEV
-  : process.env.NEXT_PUBLIC_API_URL_PROD || "http://localhost:3001";
+  const serverURL =
+    process.env.NEXT_PUBLIC_ONDEV === "TRUE"
+      ? process.env.NEXT_PUBLIC_API_URL_DEV
+      : process.env.NEXT_PUBLIC_API_URL_PROD || "http://localhost:3001";
 
   const { copyResponse, copyLinkToClipboard } = useCopyLinkToClipboard();
 
@@ -59,15 +60,20 @@ function EnviarList() {
     }
   };
 
-  const linkToClipboard = async (item: Lista) => {
+  const linkToClipboard = async (list: Lista) => {
     const currentUrl = new URL(window.location.href);
 
     currentUrl.search = "";
 
-    currentUrl.searchParams.set("name", item.name);
-    currentUrl.searchParams.set("password", item.password);
+    function encodeParams(listName: string, listPassword: string) {
+      const params = `${listName}:${listPassword}`;
+      return btoa(params); 
+    }
 
-    copyLinkToClipboard(currentUrl);
+    const encoded = encodeParams(list.name, list.password);
+    const url = `${currentUrl}?data=${encoded}`;
+
+    copyLinkToClipboard(url);
   };
 
   const handleJoinList = async () => {
@@ -105,11 +111,20 @@ function EnviarList() {
   };
 
   useEffect(() => {
-    const name = searchParams.get("name");
-    const pass = searchParams.get("password");
+    function decodeParams(encoded: any) {
+      const decoded = atob(encoded); 
+      const [name, password] = decoded.split(':');
+      return { name, password };
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = urlParams.get('data');
+    if (data) {
+      const { name, password } = decodeParams(data);
 
-    if (name) setListName(name);
-    if (pass) setListaPassword(pass);
+      if (name) setListName(name);
+      if (password) setListaPassword(password);
+    }
   }, [searchParams]);
 
   useEffect(() => {
@@ -163,7 +178,7 @@ const EnviarListWrapper = () => {
     <Suspense fallback={<div>Loading...</div>}>
       <EnviarList />
     </Suspense>
-  )
-}
+  );
+};
 
 export default EnviarListWrapper;

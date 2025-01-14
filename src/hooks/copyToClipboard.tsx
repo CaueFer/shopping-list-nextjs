@@ -6,7 +6,7 @@ import { useState } from "react";
 function useCopyLinkToClipboard() {
   const [copyResponse, setCopySuccess] = useState<boolean | null>(null);
 
-  const copyLinkToClipboard = (currentUrl: URL) => {
+  const copyLinkToClipboard = (currentUrl: URL | string) => {
     try {
       navigator.clipboard
         .writeText(currentUrl.toString())
