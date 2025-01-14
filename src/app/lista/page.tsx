@@ -569,7 +569,9 @@ function SingleLista() {
                       <div className="flex flex-row gap-2 items-center">
                         <div className="flex flex-row gap-1 items-center">
                           <Button
-                            className="rounded-full p-4 text-sm h-6 w-6 bg-gray-200 text-black hover:bg-gray-200"
+                            className={`rounded-full p-4 text-sm h-6 w-6 bg-gray-200 text-black hover:bg-gray-200 ${
+                              item.marked ? "line-through" : ""
+                            }`}
                             ref={(el) => {
                               qtyBtnRefs.current[index] = el;
                             }}
@@ -582,7 +584,9 @@ function SingleLista() {
                             {item.qty}
                           </Button>
                           <Button
-                            className="rounded-full p-4 text-sm h-6 w-6 bg-gray-200 text-black hover:bg-gray-200"
+                            className={`rounded-full p-4 text-sm h-6 w-6 bg-gray-200 text-black hover:bg-gray-200 ${
+                              item.marked ? "line-through" : ""
+                            }`}
                             ref={(el) => {
                               unitTypeBtnRefs.current[index] = el;
                             }}
@@ -601,7 +605,9 @@ function SingleLista() {
 
                         <Input
                           placeholder="nome item"
-                          className="border-0 ring-0 p-0 text-2xl focus-visible:p-0 placeholder:text-black bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px] w-auto"
+                          className={`border-0 ring-0 p-0 text-2xl focus-visible:p-0 placeholder:text-black bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px] w-auto ${
+                            item.marked ? "line-through" : ""
+                          }`}
                           onChange={(e) => {
                             updateLocalItemName(item.id, e.target.value);
                           }}

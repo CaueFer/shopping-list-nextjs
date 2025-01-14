@@ -29,7 +29,7 @@ export function SwappItem({
 
     const updateSwipeThreshold = () => {
       if (divRef.current) {
-        setSwipeThreshold(divRef.current.clientWidth * 0.2); // PORCENT DA DIV
+        setSwipeThreshold(divRef.current.clientWidth * 0.16); // PORCENT DA DIV
       }
     };
 
