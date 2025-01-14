@@ -3,7 +3,7 @@
 import { NavListas } from "@/components/layout/nav-listas";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { listItem } from "@/core/interfaces/listItem.interface";
+import { listItem, UnitType } from "@/core/interfaces/listItem.interface";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CustomDropdown } from "@/components/layout/dropdown";
-import { ToastAction } from "@/components/ui/toast";
+import { Button } from "@/components/ui/button";
 
 function SingleLista() {
   const serverURL: string =
@@ -50,7 +50,10 @@ function SingleLista() {
   const [addItem, setAddItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
   const [previousItemName, setPreviousItemName] = useState("");
+
   const itemNameInputRef = useRef<HTMLInputElement>(null);
+  const qtyBtnRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const unitTypeBtnRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const [enterPressed, setEnterPressed] = useState(false);
 
@@ -269,6 +272,8 @@ function SingleLista() {
       itemName: item.name,
       itemMarked: item.marked,
       listId: item.listId,
+      itemQty: item.qty,
+      itemUnitType: item.unitType,
     };
 
     if (updateType === "update") {
@@ -457,6 +462,62 @@ function SingleLista() {
     }
   };
 
+  const handleListItemQtyChange = (index: number) => {
+    const btn = qtyBtnRefs.current[index];
+    if (!btn || btn.textContent === null) return;
+
+    let currentValue = parseFloat(btn.textContent);
+
+    currentValue += 0.5;
+
+    if (currentValue > 5) currentValue = 0.5;
+
+    btn.textContent = currentValue.toFixed(1);
+  };
+
+  const handleListItemUnitTypeChange = (index: number) => {
+    const btnUnit = unitTypeBtnRefs.current[index];
+    if (!btnUnit || btnUnit.textContent === null) return;
+
+    let currentValue = btnUnit.textContent;
+
+    if (currentValue === "KG") currentValue = "UN";
+    else currentValue = "KG";
+
+    btnUnit.textContent = currentValue;
+  };
+
+  const updateItemQtyOnDb = (itemId: number, newQty: string | null) => {
+    if (!newQty) return;
+
+    let parsedQnty = parseFloat(newQty);
+    if (isNaN(parsedQnty)) return console.log("Erro ao converter qty");
+    const updatedList = filteredListItems.map((item) =>
+      item.id === itemId ? { ...item, qty: parsedQnty } : item
+    );
+
+    setFilteredListItems(updatedList);
+    const updatedItem = updatedList.find((item) => item.id === itemId);
+    if (updatedItem) callUpdateItemSocket(updatedItem, "update");
+  };
+
+  const updateItemUnitTypeOnDb = (
+    itemId: number,
+    newUnitType: string | null
+  ) => {
+    if (!newUnitType) return;
+
+    const newUnitTypeParsed = UnitType[newUnitType as keyof typeof UnitType];
+    if (!newUnitTypeParsed) return console.log("Erro: Unidade inválida");
+    const updatedList = filteredListItems.map((item) =>
+      item.id === itemId ? { ...item, unitType: newUnitTypeParsed } : item
+    );
+
+    setFilteredListItems(updatedList);
+    const updatedItem = updatedList.find((item) => item.id === itemId);
+    if (updatedItem) callUpdateItemSocket(updatedItem, "update");
+  };
+
   return (
     <>
       <NavListas
@@ -485,6 +546,7 @@ function SingleLista() {
           </DropdownMenuItem>
         </CustomDropdown>
       </NavListas>
+
       <main className="flex-grow bg-theme-gray relative overflow-x-clip">
         {isLoading && filteredListItems.length <= 0 ? (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -496,31 +558,65 @@ function SingleLista() {
         ) : (
           <div className="flex flex-col gap-4 p-6 h-full relative">
             {filteredListItems.length > 0 ? (
-              filteredListItems.map((item: listItem) => {
+              filteredListItems.map((item: listItem, index) => {
                 return (
                   <SwappItem item={item} onRemove={deleteItem} key={item.id}>
-                    <div className="flex flex-row gap-2 items-center text-black">
+                    <div className="flex flex-row gap-3 items-center text-black">
                       <Checkbox
                         checked={item.marked}
                         onCheckedChange={(e) => updateItemMark(item.id, e)}
                       />
-                      <Input
-                        placeholder="Item..."
-                        className="border-0 ring-0 p-0 text-lg focus-visible:p-0 placeholder:text-black focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px] w-auto"
-                        onChange={(e) => {
-                          updateLocalItemName(item.id, e.target.value);
-                        }}
-                        onBlur={(e) => {
-                          syncDbItemName(item.id, e.target.value);
-                        }}
-                        onFocus={(e) => {
-                          setPreviousItemName(e.target.value);
-                        }}
-                        value={item.name}
-                      />
+                      <div className="flex flex-row gap-2 items-center">
+                        <div className="flex flex-row gap-1 items-center">
+                          <Button
+                            className="rounded-full p-4 text-sm h-6 w-6 bg-gray-200 text-black hover:bg-gray-200"
+                            ref={(el) => {
+                              qtyBtnRefs.current[index] = el;
+                            }}
+                            defaultValue={0.5}
+                            onBlur={(e) =>
+                              updateItemQtyOnDb(item.id, e.target.textContent)
+                            }
+                            onClick={() => handleListItemQtyChange(index)}
+                          >
+                            {item.qty}
+                          </Button>
+                          <Button
+                            className="rounded-full p-4 text-sm h-6 w-6 bg-gray-200 text-black hover:bg-gray-200"
+                            ref={(el) => {
+                              unitTypeBtnRefs.current[index] = el;
+                            }}
+                            defaultValue={"UN"}
+                            onBlur={(e) =>
+                              updateItemUnitTypeOnDb(
+                                item.id,
+                                e.target.textContent
+                              )
+                            }
+                            onClick={() => handleListItemUnitTypeChange(index)}
+                          >
+                            {item.unitType}
+                          </Button>
+                        </div>
+
+                        <Input
+                          placeholder="nome item"
+                          className="border-0 ring-0 p-0 text-2xl focus-visible:p-0 placeholder:text-black bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-[24px] w-auto"
+                          onChange={(e) => {
+                            updateLocalItemName(item.id, e.target.value);
+                          }}
+                          onBlur={(e) => {
+                            syncDbItemName(item.id, e.target.value);
+                          }}
+                          onFocus={(e) => {
+                            setPreviousItemName(e.target.value);
+                          }}
+                          value={item.name}
+                        />
+                      </div>
                     </div>
 
-                    <i className="bx bx-dots-vertical-rounded text-sm"></i>
+                    <i className="bx bx-dots-vertical-rounded text-xl absolute right-3"></i>
                   </SwappItem>
                 );
               })

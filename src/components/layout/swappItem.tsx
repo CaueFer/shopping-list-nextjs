@@ -29,7 +29,7 @@ export function SwappItem({
 
     const updateSwipeThreshold = () => {
       if (divRef.current) {
-        setSwipeThreshold(divRef.current.clientWidth * 0.3); // PORCENT DA DIV
+        setSwipeThreshold(divRef.current.clientWidth * 0.2); // PORCENT DA DIV
       }
     };
 
@@ -112,7 +112,7 @@ export function SwappItem({
         </div>
         <div
           {...handlers}
-          className={`absolute rounded-lg top-0 bottom-0 right-0 w-[65%] bg-transparent flex items-center justify-between z-50`}
+          className={`absolute rounded-lg top-0 bottom-0 right-0 w-[50%] bg-transparent flex items-center justify-between z-50`}
         ></div>
       </div>
     </>
