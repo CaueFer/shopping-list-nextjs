@@ -481,10 +481,14 @@ function SingleLista() {
 
     let currentValue = btnUnit.textContent;
 
-    if (currentValue === "KG") currentValue = "UN";
-    else currentValue = "KG";
-
-    btnUnit.textContent = currentValue;
+    const values = ["KG", "UN", "CX"]; 
+    const currentIndex = values.indexOf(btnUnit.textContent); 
+    
+    // ESCOLHE O PROXIMO VALUE
+    const nextIndex = (currentIndex + 1) % values.length;
+    const nextValue = values[nextIndex]; 
+  
+    btnUnit.textContent = nextValue;
   };
 
   const updateItemQtyOnDb = (itemId: number, newQty: string | null) => {
