@@ -570,7 +570,7 @@ function SingleLista() {
                         <div className="flex flex-row gap-1 items-center">
                           <Button
                             className={`rounded-full p-4 text-sm h-6 w-6 bg-gray-200 text-black hover:bg-gray-200 ${
-                              item.marked ? "line-through" : ""
+                              item.marked ? "line-through bg-gray-900 text-white" : ""
                             }`}
                             ref={(el) => {
                               qtyBtnRefs.current[index] = el;
@@ -585,7 +585,7 @@ function SingleLista() {
                           </Button>
                           <Button
                             className={`rounded-full p-4 text-sm h-6 w-6 bg-gray-200 text-black hover:bg-gray-200 ${
-                              item.marked ? "line-through" : ""
+                              item.marked ? "line-through bg-gray-900 text-white" : ""
                             }`}
                             ref={(el) => {
                               unitTypeBtnRefs.current[index] = el;
