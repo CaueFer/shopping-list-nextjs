@@ -50,6 +50,8 @@ function ListasPage() {
       }
     } catch (error) {
       console.error("Error get lists", error);
+
+      router.push('/')
       setIsLoading(false);
     }
   };

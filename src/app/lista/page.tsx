@@ -179,7 +179,7 @@ function SingleLista() {
       console.error("Error get list items", error);
       setIsLoading(false);
 
-      router.back();
+      router.push("/");
 
       toast({
         variant: "default",
